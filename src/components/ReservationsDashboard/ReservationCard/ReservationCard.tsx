@@ -15,8 +15,8 @@ const ReservationCard: React.FC<ReservationCardProps> = ({ reservation, statusCo
       <div className="card-content">
         <div className="card-header">
           <h3 className="guest-name">{reservation.guestName}</h3>
-          <div className="action-button">
-            <button className="btn-action">
+          <div className="action-button-card">
+            <button className="btn-action-card">
               ⋮
             </button>
           </div>
