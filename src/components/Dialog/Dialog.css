@@ -1,0 +1,40 @@
+.dialog-container {
+  padding: 20px 16px;
+  width: 100%;
+  border-radius: 30px;
+  box-shadow: none;
+  max-width: 500px;
+  margin: 6px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dialog-header {
+  margin-bottom: 0.5rem;
+  margin-right: 2rem;
+  padding: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.2;
+  position: relative;
+}
+
+.dialog-close-button {
+  position: absolute;
+  right: -20px;
+  top: 0px;
+  background-color: gray;
+  color: #001;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.dialog-close-button:hover {
+  background-color: rgba(gray, 0.05);
+}

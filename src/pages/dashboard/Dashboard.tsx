@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import ReservationBoard from "../components/ReservationsDashboard/ReservationBoard";
-import { mapResponseObjectToReservation } from "../utils/reservationUtils";
-import { Reservation } from "../types/reservation";
+import ReservationBoard from "../../components/ReservationsDashboard/ReservationBoard";
+import { mapResponseObjectToReservation } from "../../utils/reservationUtils";
+import { Reservation } from "../../types/reservation";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
-import supabase from "../api/supabase-client";
+import supabase from "../../api/supabase-client";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -12,9 +12,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchReservations = async () => {
-    const { data, error } = await supabase
-      .from('reservations')
-      .select('*')  
+    const { data, error } = await supabase.from("reservations").select("*");
     if (error) {
       console.error("Error fetching: ", error);
     } else {
