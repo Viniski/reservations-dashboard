@@ -2,34 +2,38 @@ import { useEffect, useState } from "react";
 import ReservationBoard from "../components/ReservationsDashboard/ReservationBoard";
 import { mapResponseObjectToReservation } from "../utils/reservationUtils";
 import { Reservation } from "../types/reservation";
-import reservationsData from "../data/reservations.json";
 import { useNavigate } from "react-router-dom";
-import './Dashboard.css'
+import "./Dashboard.css";
+import supabase from "../api/supabase-client";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchReservations = async () => {
+    const { data, error } = await supabase
+      .from('reservations')
+      .select('*')  
+    if (error) {
+      console.error("Error fetching: ", error);
+    } else {
+      const validReservations = data.map(mapResponseObjectToReservation);
+      setReservations(validReservations);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setTimeout(() => {
-      try {
-        const validReservations = reservationsData.map(
-          mapResponseObjectToReservation
-        );
-        setReservations(validReservations);
-      } catch (error) {
-        console.error("Błąd podczas przetwarzania danych rezerwacji:", error);
-      } finally {
-        setLoading(false);
-      }
-    }, 800);
+    fetchReservations();
   }, []);
 
   return (
     <>
       <div className="action-button">
-        <button className="btn-action" onClick={() => navigate('/add')}>Dodaj rezerwacje</button>
+        <button className="btn-action" onClick={() => navigate("/add")}>
+          Dodaj rezerwacje
+        </button>
       </div>
       {loading ? (
         <div className="loading">Ładowanie danych rezerwacji...</div>
