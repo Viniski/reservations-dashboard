@@ -9,6 +9,7 @@ import supabase from "../../../api/supabase-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import QueryKey from "../../../enums/query-key";
 import { useSnackbar } from "notistack";
+import DashboardChangeStatusDialog from "./DashboardChangeStatusDialog";
 
 interface ReservationCardProps {
   reservation: Reservation;
@@ -26,13 +27,17 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
     (value) => !value,
     false
   );
+  const [isChangeStatusDialogOpen, toggleChangeStatusDialogOpen] = useReducer(
+    (value) => !value,
+    false
+  );
 
   const deleteReservationMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async () => {
       const { data } = await supabase
-      .from("reservations")
-      .delete()
-      .eq("id", id);
+        .from("reservations")
+        .delete()
+        .eq("id", reservation.id);
 
       return data;
     },
@@ -42,16 +47,49 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
       toggleIsDeleteDialogOpen();
     },
     onError: () => {
-      enqueueSnackbar("Usuawnie rezerwacji nie powiodło się.", { variant: "error" });
-    }
+      enqueueSnackbar("Usuawnie rezerwacji nie powiodło się.", {
+        variant: "error",
+      });
+    },
+  });
+
+  const changeStatusReservationMutation = useMutation({
+    mutationFn: async (status: string) => {
+      const { data } = await supabase
+        .from("reservations")
+        .update({ status })
+        .eq("id", reservation.id);
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QueryKey.RESERVATIONS] });
+      enqueueSnackbar("Status rezerwacji został zmieniony pomyślnie!", {
+        variant: "success",
+      });
+      toggleChangeStatusDialogOpen();
+    },
+    onError: () => {
+      enqueueSnackbar("Zmiana statusu rezerwacji nie powiodła się.", {
+        variant: "error",
+      });
+    },
   });
 
   return (
     <>
+      <DashboardChangeStatusDialog
+        reservation={reservation}
+        open={isChangeStatusDialogOpen}
+        onClose={toggleChangeStatusDialogOpen}
+        onConfirm={(status) => {
+          changeStatusReservationMutation.mutate(status);
+        }}
+      />
       <DashboardDeleteDialog
         open={isDeleteDialogOpen}
         onClose={toggleIsDeleteDialogOpen}
-        onConfirm={() => deleteReservationMutation.mutate(reservation.id)}
+        onConfirm={() => deleteReservationMutation.mutate()}
       />
       <div className="reservation-card">
         <div
@@ -78,6 +116,12 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
               <MenuItem onClick={() => toggleIsDeleteDialogOpen()}>
                 Usuń rezerwację
               </MenuItem>
+              {reservation.status !== "Due Out" &&
+                reservation.status !== "No Show" && (
+                  <MenuItem onClick={() => toggleChangeStatusDialogOpen()}>
+                    Zmień status
+                  </MenuItem>
+                )}
             </Menu>
           </div>
 
