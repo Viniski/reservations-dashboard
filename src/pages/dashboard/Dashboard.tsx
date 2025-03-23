@@ -1,30 +1,29 @@
-import { useEffect, useState } from "react";
 import ReservationBoard from "../../components/ReservationsDashboard/ReservationBoard";
 import { mapResponseObjectToReservation } from "../../utils/reservationUtils";
-import { Reservation } from "../../types/reservation";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 import supabase from "../../api/supabase-client";
+import { useQuery } from "@tanstack/react-query";
+import QueryKey from "../../enums/query-key";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const fetchReservations = async () => {
-    const { data, error } = await supabase.from("reservations").select("*");
-    if (error) {
-      console.error("Error fetching: ", error);
-    } else {
-      const validReservations = data.map(mapResponseObjectToReservation);
-      setReservations(validReservations);
-      setLoading(false);
+    const { data } = await supabase.from("reservations").select("*");
+    const validReservations = data?.map(mapResponseObjectToReservation);
+      
+    return validReservations
     }
-  };
 
-  useEffect(() => {
-    fetchReservations();
-  }, []);
+  const useReservationsQuery = () =>
+    useQuery({
+      queryKey: [QueryKey.RESERVATIONS],
+      queryFn: fetchReservations,
+      staleTime: Infinity,
+    });
+
+   const reservationsQuery = useReservationsQuery();  
 
   return (
     <>
@@ -33,10 +32,10 @@ const Dashboard = () => {
           Dodaj rezerwacje
         </button>
       </div>
-      {loading ? (
+      {reservationsQuery.isLoading ? (
         <div className="loading">Ładowanie danych rezerwacji...</div>
       ) : (
-        <ReservationBoard reservations={reservations} />
+        <ReservationBoard reservations={reservationsQuery.data} />
       )}
     </>
   );

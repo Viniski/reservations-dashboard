@@ -4,7 +4,7 @@ import ReservationCard from './ReservationCard/ReservationCard';
 import './ReservationBoard.css';
 
 interface ReservationBoardProps {
-  reservations: Reservation[];
+  reservations: Reservation[] | undefined;
 }
 
 const ReservationBoard: React.FC<ReservationBoardProps> = ({ reservations }) => {
@@ -20,7 +20,7 @@ const ReservationBoard: React.FC<ReservationBoardProps> = ({ reservations }) => 
       'No Show': []
     };
 
-    reservations.forEach(reservation => {
+    reservations?.forEach(reservation => {
       groups[reservation.status].push(reservation);
     });
 

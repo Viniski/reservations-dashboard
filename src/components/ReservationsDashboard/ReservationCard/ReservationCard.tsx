@@ -6,6 +6,9 @@ import { Menu, MenuItem } from "@mui/material";
 import useAnchorElement from "../../../hooks/use-anchor-element";
 import DashboardDeleteDialog from "./DashboardDeleteDialog";
 import supabase from "../../../api/supabase-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import QueryKey from "../../../enums/query-key";
+import { useSnackbar } from "notistack";
 
 interface ReservationCardProps {
   reservation: Reservation;
@@ -16,36 +19,39 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
   reservation,
   statusColor,
 }) => {
+  const queryClient = useQueryClient();
   const { anchorEl, onToggle } = useAnchorElement();
-  const [isNewChatDialogOpen, toggleIsNewChatDialogOpen] = useReducer(
+  const { enqueueSnackbar } = useSnackbar();
+  const [isDeleteDialogOpen, toggleIsDeleteDialogOpen] = useReducer(
     (value) => !value,
     false
   );
 
-  const handleDeleteReservation = async (id: string) => {
-    await deleteReservation(id);
-    toggleIsNewChatDialogOpen();
-  };
-
-  const deleteReservation = async (id: string) => {
-    const { data, error } = await supabase
+  const deleteReservationMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await supabase
       .from("reservations")
       .delete()
       .eq("id", id);
 
-    if (error) {
-      console.log("error deleting task: ", error);
-    } else {
-      console.log("deleted task: ", data);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QueryKey.RESERVATIONS] });
+      enqueueSnackbar("Rezerwacja została usunięta!", { variant: "success" });
+      toggleIsDeleteDialogOpen();
+    },
+    onError: () => {
+      enqueueSnackbar("Usuawnie rezerwacji nie powiodło się.", { variant: "error" });
     }
-  };
+  });
 
   return (
     <>
       <DashboardDeleteDialog
-        open={isNewChatDialogOpen}
-        onClose={toggleIsNewChatDialogOpen}
-        onConfirm={() => handleDeleteReservation(reservation.id)}
+        open={isDeleteDialogOpen}
+        onClose={toggleIsDeleteDialogOpen}
+        onConfirm={() => deleteReservationMutation.mutate(reservation.id)}
       />
       <div className="reservation-card">
         <div
@@ -69,7 +75,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
               onClick={onToggle}
               onClose={onToggle}
             >
-              <MenuItem onClick={() => toggleIsNewChatDialogOpen()}>
+              <MenuItem onClick={() => toggleIsDeleteDialogOpen()}>
                 Usuń rezerwację
               </MenuItem>
             </Menu>
