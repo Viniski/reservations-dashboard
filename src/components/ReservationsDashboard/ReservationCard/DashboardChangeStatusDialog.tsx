@@ -1,49 +1,27 @@
-import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
+import { Button, FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import AppDialog from "../../Dialog";
 import { Reservation, ReservationStatus } from "../../../types/reservation";
 import { Controller, useForm } from "react-hook-form";
+import { getPossibleStatusesToChange } from "../../../utils/reservationUtils";
 
-type StatusType = string | undefined;
-
-const getPossibleStatusesToChange = (status: ReservationStatus) => {
-  if (status === "Reserved") {
-    return ["Cancelled", "Due In"] as const;
-  }
-
-  if (status === "Due In") {
-    return ["Cancelled", "No Show", "In House"] as const;
-  }
-
-  if (status === "In House") {
-    return ["Checked Out"] as const;
-  }
-
-  if (status === "Checked Out") {
-    return ["In House"] as const;
-  }
-
-  if (status === "Canceled") {
-    return ["Reserved"] as const;
-  }
-};
-
-const DashboardChangeStatusDialog = ({
-  open,
-  reservation,
-  onClose,
-  onConfirm,
-}: {
+interface DashboardChangeStatusDialogProps {
   open: boolean;
   reservation: Reservation;
   onClose: () => void;
   onConfirm: (status: ReservationStatus) => void;
-}) => {
-  const possibleStatuses =
-    getPossibleStatusesToChange(reservation.status) || [];
+}
 
-  const statusForm = useForm<{ status: StatusType }>({
+const DashboardChangeStatusDialog: React.FC<DashboardChangeStatusDialogProps> = ({
+  open,
+  reservation,
+  onClose,
+  onConfirm,
+}) => {
+  const possibleStatuses = getPossibleStatusesToChange(reservation.status);
+
+  const statusForm = useForm<{ status: ReservationStatus }>({
     defaultValues: {
-      status: possibleStatuses[0],
+      status: possibleStatuses?.[0],
     },
   });
 
@@ -62,10 +40,10 @@ const DashboardChangeStatusDialog = ({
           <RadioGroup
             value={field.value}
             onChange={(event) =>
-              statusForm.setValue("status", event.target.value)
+              statusForm.setValue("status", event.target.value as ReservationStatus)
             }
           >
-            {possibleStatuses.map((answer) => (
+            {(possibleStatuses || []).map((answer) => (
               <FormControlLabel
                 key={answer}
                 label={answer}
@@ -77,15 +55,24 @@ const DashboardChangeStatusDialog = ({
         )}
       />
       <AppDialog.Actions>
-        <button onClick={onClose}>Anuluj</button>
-        <button
-          disabled={!statusForm.getValues("status")}
+        <Button
+          type="submit"
+          variant="outlined"
+          color="primary"
+          onClick={onClose}
+        >
+          Anuluj
+        </Button>
+        <Button
+          type="submit"
+          variant="outlined"
+          color="primary"
           onClick={() =>
             onConfirm(statusForm.getValues("status") as ReservationStatus)
           }
         >
           Potwierdź
-        </button>
+        </Button>
       </AppDialog.Actions>
     </AppDialog.Container>
   );

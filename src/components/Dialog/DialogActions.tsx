@@ -1,8 +1,8 @@
 import { ChildrenProps } from "../../types/reservation";
-import './Dialog.css';
+import "./Dialog.css";
 
-const Actions = ({ children }: ChildrenProps) => (
-  <div className={'dialog-actions'}>{children}</div>
+const Actions: React.FC<ChildrenProps> = ({ children }) => (
+  <div className="dialog-actions">{children}</div>
 );
 
 export default Actions;

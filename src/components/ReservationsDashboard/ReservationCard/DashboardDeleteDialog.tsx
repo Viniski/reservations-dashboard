@@ -1,24 +1,41 @@
+import { Button } from "@mui/material";
 import AppDialog from "../../Dialog";
 
-const DashboardDeleteDialog = ({
-  open,
-  onClose,
-  onConfirm,
-}: {
+interface DashboardDeleteDialogProps {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
+}
+
+const DashboardDeleteDialog: React.FC<DashboardDeleteDialogProps> = ({
+  open,
+  onClose,
+  onConfirm,
 }) => (
   <AppDialog.Container open={open}>
     <AppDialog.Title onClose={onClose}>
-      Czy jesteś pewny, że chcesz usunąć zgłoszenie?
+      Chcesz usunąć zgłoszenie?
     </AppDialog.Title>
     <AppDialog.Description>
-      Pamiętaj, że nie będziesz mógł już przywrócić zgłoszenia.
+      Pamiętaj, że nie będziesz mógł już go nigdy przywrócić.
     </AppDialog.Description>
     <AppDialog.Actions>
-      <button onClick={onClose}>Anuluj</button>
-      <button onClick={onConfirm}>Potwierdź</button>
+      <Button
+        type="submit"
+        variant="outlined"
+        color="primary"
+        onClick={onClose}
+      >
+        Anuluj
+      </Button>
+      <Button
+        type="submit"
+        variant="outlined"
+        color="primary"
+        onClick={onConfirm}
+      >
+        Potwierdź
+      </Button>
     </AppDialog.Actions>
   </AppDialog.Container>
 );

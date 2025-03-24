@@ -1,9 +1,9 @@
-import "./App.css";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Header from "./components/Header/Header";
-import Dashboard from "./pages/dashboard/Dashboard";
-import Create from "./pages/create/Create";
-import Edit from "./pages/edit/Edit";
+import Dashboard from "./pages/Dashboard";
+import Create from "./pages/Create";
+import Edit from "./pages/Edit";
+import "./App.css";
 
 function App() {
   return (

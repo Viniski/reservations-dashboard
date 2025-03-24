@@ -1,11 +1,8 @@
-import { Dialog, DialogProps } from '@mui/material';
-import './Dialog.css';
+import { Dialog, DialogProps } from "@mui/material";
+import "./Dialog.css";
 
-const Container = (props: DialogProps) => (
-  <Dialog
-    classes={{ paper: 'dialog-container' }}
-    {...props}
-  />
+const Container: React.FC<DialogProps> = (props) => (
+  <Dialog classes={{ paper: "dialog-container" }} {...props} />
 );
 
 export default Container;

@@ -1,24 +1,23 @@
 import { useForm, Controller } from "react-hook-form";
 import { TextField, Button } from "@mui/material";
 import { Reservation } from "../../types/reservation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { useSnackbar } from "notistack";
-import QueryKey from "../../enums/query-key";
-import supabase from "../../api/supabase-client";
-import { formatDate } from "../../utils/dateFormatters";
+import { useReservationFormMutation } from "../../hooks/useReservationFormMutation";
+import "./ReservationForm.css";
 
-const ReservationForm = ({
-  defaultValue,
-  type,
-}: {
+interface ReservationFormProps {
   defaultValue?: Reservation;
   type: "edit" | "create";
-}) => {
-  const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate();
+}
 
+const ReservationForm: React.FC<ReservationFormProps> = ({
+  defaultValue,
+  type,
+}) => {
+  const isTypeCreate = type === "create";
+  const reservationFormMutation = useReservationFormMutation(
+    isTypeCreate,
+    defaultValue
+  );
   const form = useForm({
     defaultValues: {
       guestName: defaultValue?.guestName || "",
@@ -27,55 +26,6 @@ const ReservationForm = ({
       roomNumber: defaultValue?.roomNumber || "",
       notes: defaultValue?.notes || "",
       email: defaultValue?.email || "",
-    },
-  });
-
-  const editReservation = async (
-    formData: Omit<Reservation, "id" | "status">
-  ) => {
-    const { data } = await supabase
-      .from("reservations")
-      .update({ ...formData, status: defaultValue?.status })
-      .eq("id", defaultValue?.id);
-
-    return data;
-  };
-
-  const createReservation = async (
-    formData: Omit<Reservation, "id" | "status">
-  ) => {
-    const status =
-      formatDate("today") === formatDate(formData.checkInDate)
-        ? "Due In"
-        : "Reserved";
-
-    const { data } = await supabase
-      .from("reservations")
-      .insert([{ ...formData, status }])
-      .single();
-
-    return data;
-  };
-
-  const reservationFormMutation = useMutation({
-    mutationFn: type === "create" ? createReservation : editReservation,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QueryKey.RESERVATIONS] });
-      enqueueSnackbar(
-        `Rezerwacja została ${type === "create" ? "dodana" : "edytowana"}!`,
-        { variant: "success" }
-      );
-      navigate("/");
-    },
-    onError: () => {
-      enqueueSnackbar(
-        `${
-          type === "create" ? "Dodanie" : "Edytowanie"
-        } rezerwacji nie powiodło się.`,
-        {
-          variant: "error",
-        }
-      );
     },
   });
 
@@ -99,14 +49,14 @@ const ReservationForm = ({
           />
         )}
       />
-      {type === "create" && (
+      {isTypeCreate && (
         <>
           <Controller
             name="checkInDate"
             control={form.control}
             rules={{
               required: "Data przyjazdu jest wymagana",
-              validate: (value) => {                
+              validate: (value) => {
                 return new Date(value) <
                   new Date(form.getValues("checkOutDate"))
                   ? true
@@ -122,7 +72,7 @@ const ReservationForm = ({
                 helperText={fieldState.error?.message}
                 slotProps={{
                   htmlInput: { min: new Date().toISOString().split("T")[0] },
-                  inputLabel: { shrink: true }
+                  inputLabel: { shrink: true },
                 }}
               />
             )}
@@ -153,15 +103,17 @@ const ReservationForm = ({
               />
             )}
           />
+
           <Controller
             name="roomNumber"
             control={form.control}
             render={({ field }) => (
-              <TextField {...field} label="Numer pokoju" />
+              <TextField {...field} type="number" label="Numer pokoju" />
             )}
           />
         </>
       )}
+
       <Controller
         name="notes"
         control={form.control}
@@ -169,6 +121,7 @@ const ReservationForm = ({
           <TextField {...field} label="Notatka" multiline rows={4} />
         )}
       />
+
       <Controller
         name="email"
         control={form.control}
@@ -187,8 +140,9 @@ const ReservationForm = ({
           />
         )}
       />
+
       <Button type="submit" variant="contained" color="primary">
-        {type === "create" ? "Dodaj rezerwację" : "Zapisz zmiany"}
+        {isTypeCreate ? "Dodaj rezerwację" : "Zapisz zmiany"}
       </Button>
     </form>
   );

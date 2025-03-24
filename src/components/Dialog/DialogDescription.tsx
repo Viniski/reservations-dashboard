@@ -1,7 +1,8 @@
 import { ChildrenProps } from "../../types/reservation";
+import "./Dialog.css";
 
-const Description = ({ children }: ChildrenProps) => (
-  <p style={{ color: 'gray' }}>{children}</p>
+const Description:React.FC<ChildrenProps> = ({ children }) => (
+  <p className="dialog-description">{children}</p>
 );
 
 export default Description;

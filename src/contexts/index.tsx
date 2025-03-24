@@ -1,6 +1,6 @@
 import { ChildrenProps } from "../types/reservation";
 import { SnackbarProvider } from "notistack";
-import QueryClientProvider from "./query-client-provider";
+import QueryClientProvider from "./queryClientProvider";
 
 const AppContextsProvider = ({ children }: ChildrenProps) => (
   <SnackbarProvider autoHideDuration={3000}>

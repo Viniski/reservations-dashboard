@@ -1,22 +1,21 @@
-import { IconButton } from '@mui/material';
-import { ChildrenProps } from '../../types/reservation';
-
+import { ChildrenProps } from "../../types/reservation";
+import "./Dialog.css";
 
 interface AppDialogTitleProps extends ChildrenProps {
   onClose?: () => void;
 }
 
-const Title = ({ children, onClose }: AppDialogTitleProps) => (
-  <h2 className="dialog-title">
+const Title: React.FC<AppDialogTitleProps> = ({ children, onClose }) => (
+  <h2 className="dialog-header">
     {children}
     {onClose && (
-      <IconButton
+      <button
         aria-label="close"
-        className="dialog-close-button"
+        className="dialog-close-button btn-action-card"
         onClick={onClose}
       >
         X
-      </IconButton>
+      </button>
     )}
   </h2>
 );

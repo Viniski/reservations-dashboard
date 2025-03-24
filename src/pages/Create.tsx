@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import ReservationForm from "../../components/ReservationForm/ReservationForm";
+import ReservationForm from "../components/ReservationForm/ReservationForm";
+import "../styles/styles.css";
 
 const Create = () => {
   const navigate = useNavigate();

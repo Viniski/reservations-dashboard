@@ -1,5 +1,5 @@
-import React from 'react';
-import './Header.css';
+import React from "react";
+import "./Header.css";
 
 const Header: React.FC = () => {
   return (
@@ -10,11 +10,11 @@ const Header: React.FC = () => {
         </div>
         <div className="header-actions">
           <div className="date-display">
-            {new Date().toLocaleDateString('pl-PL', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
+            {new Date().toLocaleDateString("pl-PL", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
             })}
           </div>
         </div>
@@ -23,4 +23,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header; 
+export default Header;

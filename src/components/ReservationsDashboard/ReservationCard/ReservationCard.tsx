@@ -1,16 +1,14 @@
 import React, { useReducer } from "react";
 import { Reservation } from "../../../types/reservation";
 import { formatDate } from "../../../utils/dateFormatters";
-import "./ReservationCard.css";
 import { Menu, MenuItem } from "@mui/material";
-import useAnchorElement from "../../../hooks/use-anchor-element";
+import useAnchorElement from "../../../hooks/useAnchorElement";
 import DashboardDeleteDialog from "./DashboardDeleteDialog";
-import supabase from "../../../api/supabase-client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import QueryKey from "../../../enums/query-key";
-import { useSnackbar } from "notistack";
 import DashboardChangeStatusDialog from "./DashboardChangeStatusDialog";
 import { useNavigate } from "react-router-dom";
+import { useDeleteReservationMutation } from "../../../hooks/useDeleteReservationMutation";
+import { useChangeStatusReservationMutation } from "../../../hooks/useChangeStatusReservationMutation";
+import "./ReservationCard.css";
 
 interface ReservationCardProps {
   reservation: Reservation;
@@ -22,9 +20,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
   statusColor,
 }) => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { anchorEl, onToggle } = useAnchorElement();
-  const { enqueueSnackbar } = useSnackbar();
   const [isDeleteDialogOpen, toggleIsDeleteDialogOpen] = useReducer(
     (value) => !value,
     false
@@ -34,47 +30,14 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
     false
   );
 
-  const deleteReservationMutation = useMutation({
-    mutationFn: async () => {
-      await supabase
-        .from("reservations")
-        .delete()
-        .eq("id", reservation.id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QueryKey.RESERVATIONS] });
-      enqueueSnackbar("Rezerwacja została usunięta!", { variant: "success" });
-      toggleIsDeleteDialogOpen();
-    },
-    onError: () => {
-      enqueueSnackbar("Usuawnie rezerwacji nie powiodło się.", {
-        variant: "error",
-      });
-    },
-  });
-
-  const changeStatusReservationMutation = useMutation({
-    mutationFn: async (status: string) => {
-      const { data } = await supabase
-        .from("reservations")
-        .update({ status })
-        .eq("id", reservation.id);
-
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QueryKey.RESERVATIONS] });
-      enqueueSnackbar("Status rezerwacji został zmieniony pomyślnie!", {
-        variant: "success",
-      });
-      toggleChangeStatusDialogOpen();
-    },
-    onError: () => {
-      enqueueSnackbar("Zmiana statusu rezerwacji nie powiodła się.", {
-        variant: "error",
-      });
-    },
-  });
+  const deleteReservationMutation = useDeleteReservationMutation(
+    reservation.id,
+    toggleIsDeleteDialogOpen
+  );
+  const changeStatusReservationMutation = useChangeStatusReservationMutation(
+    reservation.id,
+    toggleChangeStatusDialogOpen
+  );
 
   return (
     <>
@@ -125,7 +88,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
               {(reservation.status === "Due In" ||
                 reservation.status === "Reserved") && (
                 <MenuItem onClick={() => navigate(`/edit/${reservation.id}`)}>
-                  Edytuj rezerwawcję
+                  Edytuj rezerwację
                 </MenuItem>
               )}
             </Menu>
