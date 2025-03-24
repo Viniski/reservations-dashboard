@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import QueryKey from "../../../enums/query-key";
 import { useSnackbar } from "notistack";
 import DashboardChangeStatusDialog from "./DashboardChangeStatusDialog";
+import { useNavigate } from "react-router-dom";
 
 interface ReservationCardProps {
   reservation: Reservation;
@@ -20,6 +21,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
   reservation,
   statusColor,
 }) => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { anchorEl, onToggle } = useAnchorElement();
   const { enqueueSnackbar } = useSnackbar();
@@ -34,12 +36,10 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
 
   const deleteReservationMutation = useMutation({
     mutationFn: async () => {
-      const { data } = await supabase
+      await supabase
         .from("reservations")
         .delete()
         .eq("id", reservation.id);
-
-      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QueryKey.RESERVATIONS] });
@@ -122,6 +122,12 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
                     Zmień status
                   </MenuItem>
                 )}
+              {(reservation.status === "Due In" ||
+                reservation.status === "Reserved") && (
+                <MenuItem onClick={() => navigate(`/edit/${reservation.id}`)}>
+                  Edytuj rezerwawcję
+                </MenuItem>
+              )}
             </Menu>
           </div>
 
